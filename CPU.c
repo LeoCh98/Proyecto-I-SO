@@ -38,7 +38,7 @@ void getPercentByProcess(int pid)
     double process_usage_sec = process_utime_sec + process_stime_sec;
     double process_usage = (process_usage_sec * 100) / process_elapsed_sec;
 
-    printf("Porcentaje de utilización de CPU para el proceso %s con el id %d: %.2f%%\n", processName, pid, process_usage);
+    printf("%s's PID:%d total CPU usage is: %.2f%%\n", processName, pid, process_usage);
 }
 
 double getTotalPercent()
@@ -99,12 +99,11 @@ int main(int argc, char *argv[])
 {
     if (argc == 2 && strcmp(argv[1], "cpu") == 0)
     {
-        printf("Porcentaje total de utilización de CPU: %.2f%%\n", getTotalPercent());
+        printf("The total CPU usage: %.2f%%\n", getTotalPercent());
     }
     else if (argc == 3)
     {
         int pid = atoi(argv[2]);
-        //printf("The PID %d has a total CPU usage is %.2f \n", pid, getPercentByProcess(pid));
         getPercentByProcess(pid);
     }
     return 0;
