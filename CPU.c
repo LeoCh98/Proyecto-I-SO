@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include<string.h>
+#include <string.h>
 
 #define MAX_LINE_LENGTH 256
 
