@@ -1,10 +1,14 @@
-#include <stdio.h>
+#include <sys/sysinfo.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <string.h>
+#include <fcntl.h>
+#include <stdio.h>
 
-#define MAX_LINE_LENGTH 256
+#define MAX_LINE_LENGTH 1024
 
 float getUsageReal(int pid)
 {
@@ -60,7 +64,21 @@ float getUsageVirtual(int pid)
 
 int main(int argc, char *argv[])
 {
-    if (strcmp(argv[1], "memoria") == 0 && strcmp(argv[2], "-r") == 0)
+    int fd;
+
+    char* information;
+    information = (char*)malloc(1024);
+
+    fd = open(argv[1], O_CREAT | O_WRONLY, 0666);
+
+    if(fd == -1){
+        perror("Error al crear el archivo temporal.");
+        exit(1);
+    }
+
+    // GENERACIÓN DE LA INFORMACIÓN
+
+    if (strcmp(argv[2], "memoria") == 0 && strcmp(argv[3], "-r") == 0)
     {
         printf("PID\tPercentage of real memory used\n");
         FILE *fp = fopen("/proc/meminfo", "r");
@@ -102,19 +120,25 @@ int main(int argc, char *argv[])
         }
         closedir(dir);
     }
-    else if (strcmp(argv[1], "memoria") == 0 && strcmp(argv[2], "-v") == 0)
+    else if (strcmp(argv[2], "memoria") == 0 && strcmp(argv[3], "-v") == 0)
     {
-        int pid = atoi(argv[3]);
+        int pid = atoi(argv[4]);
         float memory_usage = getUsageVirtual(pid);
         if (memory_usage != -1.0)
         {
-            printf("PID: %d, Percentage of virtual memory used: %.1f%%\n", pid, memory_usage);
+            snprintf(information, MAX_LINE_LENGTH, "PID: %d, Percentage of virtual memory used: %.1f%%\n", pid, memory_usage);
         }
         else
         {
-            printf("Error getting process information with PID: %d\n", pid);
-            return 1;
+            snprintf(information, MAX_LINE_LENGTH, "Error getting process information with PID: %d\n", pid);
         }
     }
+
+    // ESCRITURA EN EL PIPE
+
+    write(fd, information, MAX_LINE_LENGTH);
+
+    close(fd);
+
     return 0;
 }

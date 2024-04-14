@@ -1,13 +1,16 @@
-#include <stdio.h>
+#include <sys/sysinfo.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <fcntl.h>
+#include <stdio.h>
 
-#define MAX_LINE_LENGTH 256
+#define MAX_LINE_LENGTH 1024
 
-void getPercentByProcess(int pid)
+char* getPercentByProcess(int pid)
 {
     char statPath[256];
     snprintf(statPath, sizeof(statPath), "/proc/%d/stat", pid);
@@ -38,7 +41,12 @@ void getPercentByProcess(int pid)
     double process_usage_sec = process_utime_sec + process_stime_sec;
     double process_usage = (process_usage_sec * 100) / process_elapsed_sec;
 
-    printf("%s's PID:%d total CPU usage is: %.2f%%\n", processName, pid, process_usage);
+    char* information;
+    information = (char*)malloc(1024);
+    
+    snprintf(information, 1024, "%s's PID:%d total CPU usage is: %.2f%%\n", processName, pid, process_usage);
+
+    return information;
 }
 
 double getTotalPercent()
@@ -97,14 +105,35 @@ double getTotalPercent()
 
 int main(int argc, char *argv[])
 {
-    if (argc == 2 && strcmp(argv[1], "cpu") == 0)
-    {
-        printf("The total CPU usage: %.2f%%\n", getTotalPercent());
+    int fd;
+
+    char* information;
+    information = (char*)malloc(1024);
+
+    fd = open(argv[1], O_CREAT | O_WRONLY, 0666);
+
+    if(fd == -1){
+        perror("Error al crear el archivo temporal.");
+        exit(1);
     }
-    else if (argc == 3)
+
+    // GENERACIÓN DE LA INFORMACIÓN
+
+    if (argc == 3 && strcmp(argv[2], "cpu") == 0)
     {
-        int pid = atoi(argv[2]);
-        getPercentByProcess(pid);
+        snprintf(information, MAX_LINE_LENGTH, "The total CPU usage: %.2f%%\n", getTotalPercent());
     }
+    else if (argc == 4)
+    {
+        int pid = atoi(argv[3]);
+        information = getPercentByProcess(pid);
+    }
+
+    // ESCRITURA EN EL PIPE
+
+    write(fd, information, MAX_LINE_LENGTH);
+
+    close(fd);
+
     return 0;
 }

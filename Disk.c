@@ -1,21 +1,41 @@
-#include <stdio.h>
+#include <sys/sysinfo.h>
+#include <sys/statvfs.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/statvfs.h>
+#include <fcntl.h>
+#include <stdio.h>
 
+#define BUFFER 1024
 #define MiB (1024 * 1024)
 #define GiB (MiB * 1024)
 
 int main(int argc, char *argv[])
 {
-    char *path = argv[1];
-    char *option = argv[2];
+    int fd;
+
+    char* information;
+    information = (char*)malloc(1024);
+
+    printf("%s, %s, %s, %s, %s\n", argv[0], argv[1], argv[2], argv[3], argv[4]);
+
+    fd = open(argv[1], O_CREAT | O_WRONLY, 0666);
+
+    if(fd == -1){
+        perror("Error al crear el archivo temporal.");
+        exit(1);
+    }
+
+    char *path = argv[2];
+    char *option = argv[3];
 
     struct statvfs stat;
     if (statvfs(path, &stat) != 0)
     {
         perror("Error getting information on this filesystem..");
-        return 1;
+        return 0;
     }
 
     unsigned long long fs_block_size = stat.f_frsize;
@@ -24,24 +44,29 @@ int main(int argc, char *argv[])
     unsigned long long available = (unsigned long long)stat.f_bfree * fs_block_size;
     unsigned long long used = total - available;
 
-    if (argc == 2)
+    if (argc == 3)
     {
-        printf("Summary disk:\n");
-        printf("Disk total: %.2f GiB\n", (double)total / GiB);
-        printf("Disk usage: %.2f GiB\n", (double)used / GiB);
-        printf("Disk available: %.2f GiB\n", (double)available / GiB);
+        snprintf(information, BUFFER, "Summary disk:\nDisk total: %.2f GiB\nDisk usage: %.2f GiB\nDisk available: %.2f GiB\n", 
+        (double)total / GiB, (double)used / GiB, (double)available / GiB);
+    } else if (argc == 4) 
+    {
+        if (strcmp(option, "-tm") == 0)
+        {
+            snprintf(information, BUFFER, "Disk usage: %.3f MiB\nDisk available: %.3f MiB\n", 
+            (double)used / MiB, (double)available / MiB);
+        } 
+        if (strcmp(option, "-tg") == 0)
+        {
+            snprintf(information, BUFFER, "Disk usage: %.2f GiB\nDisk available: %.2f GiB\n", 
+            (double)used / GiB, (double)available / GiB);
+        }
     }
 
-    if (strcmp(option, "-tm") == 0)
-    {
-        printf("Disk usage: %.3f MiB\n", (double)used / MiB);
-        printf("Disk available: %.3f MiB\n", (double)available / MiB);
-    }
-    if (strcmp(option, "-tg") == 0)
-    {
-        printf("Disk usage: %.2f GiB\n", (double)used / GiB);
-        printf("Disk available: %.2f GiB\n", (double)available / GiB);
-    }
+    write(fd, information, BUFFER);
+
+    close(fd);
+    
+    printf("Información: %s", information);
 
     return 0;
 }
