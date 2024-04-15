@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/statvfs.h>
+#include <unistd.h>
 
 #define MiB (1024 * 1024)
 #define GiB (MiB * 1024)
@@ -25,22 +26,22 @@ int main(int argc, char *argv[])
     unsigned long long available = (unsigned long long)stat.f_bfree * fs_block_size;
     unsigned long long used = total - available;
 
+    printf("Estadisticas del disco:\n");
+
     if (argc == 2)
     {
-        printf("Estadisticas del disco:\n");
         printf("- Disco total: %.2f GiB\n", (double)total / GiB);
         printf("- Disco usado: %.2f GiB\n", (double)used / GiB);
         printf("- Disco disponible: %.2f GiB\n", (double)available / GiB);
     } else if (argc == 3){
         if (strcmp(option, "-tm") == 0)
         {
-            printf("Disco usado: %.3f MiB\n", (double)used / MiB);
-            printf("Disco disponible: %.3f MiB\n", (double)available / MiB);
-        }
-        if (strcmp(option, "-tg") == 0)
+            printf("- Disco usado: %.3f MiB\n", (double)used / MiB);
+            printf("- Disco disponible: %.3f MiB\n", (double)available / MiB);
+        } else if (strcmp(option, "-tg") == 0)
         {
-            printf("Disco usado: %.2f GiB\n", (double)used / GiB);
-            printf("Disco disponible: %.2f GiB\n", (double)available / GiB);
+            printf("- Disco usado: %.2f GiB\n", (double)used / GiB);
+            printf("- Disco disponible: %.2f GiB\n", (double)available / GiB);
         } else {
             printf("El parámetro ingresado no es válido.\n");
         }

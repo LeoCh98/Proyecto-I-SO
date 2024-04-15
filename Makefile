@@ -9,7 +9,7 @@ cpu.o: cpu.c
 	$(CC) cpu.c -o cpu -Wall
 
 disk.o: disk.c
-	$(CC) disk.c -o disk -Wall
+	sudo $(CC) disk.c -o disco -Wall
 
 ram.o: ram.c
 	$(CC) ram.c -o ram -Wall

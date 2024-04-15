@@ -120,7 +120,7 @@ int main(int argc, char *argv[]){
                 argv[2], // Parámetro
                 NULL
             };
-            execv("./disk", disk_A);
+            execv("./disco", disk_A);
             printf("Error, no actualizó el proceso.");
         } else {
             close(pipefd_Disk[1]);

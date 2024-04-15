@@ -58,6 +58,12 @@ float getUsageVirtual(int pid)
 
 int main(int argc, char *argv[])
 {
+    if (argc == 2)
+    {
+        printf("Error. No se ha especificado algún tipo de memoria (memoria <-r> / <-v> <PID>).\n");
+        return 0;
+    }
+
     if (strcmp(argv[1], "memoria") == 0 && strcmp(argv[2], "-r") == 0)
     {
         printf("PID\tPercentage of real memory used\n");
@@ -115,7 +121,7 @@ int main(int argc, char *argv[])
             }
         } else {
             // Acá tendría que ir para imprimir todos los procesos con su respectivo uso de memoria virtual.
-            printf("Error. No se ha ingresado ningún PID.\n");
+            printf("Error. No se ha ingresado ningún PID (-v <PID>).\n");
         }
         
     }
