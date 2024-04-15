@@ -96,7 +96,7 @@ int main(int argc, char *argv[]){
             }               
         }
 
-    } else if (strcmp(argv[1],"disco") == 0){ // Llamado para datos de la RAM
+    } else if (strncmp(argv[1], "/mnt", 4) == 0){ // Llamado para datos de la Disco
 
         int pipefd_Disk[2];    
         pipe(pipefd_Disk);
