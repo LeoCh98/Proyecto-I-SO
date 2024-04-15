@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 
     if (statvfs(path, &stat) != 0)
     {
-        perror("Error getting information on this filesystem..");
+        perror("Error al obtener la información de este directorio de archivos.");
         return 1;
     }
 

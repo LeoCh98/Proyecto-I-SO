@@ -4,24 +4,42 @@
 #include <unistd.h>
 #include <dirent.h>
 
-#define MAX_LINE_LENGTH 256
+#define BUFFER 256
 
 float getUsageReal(int pid)
 {
-    char path[MAX_LINE_LENGTH];
+    char path[BUFFER];
     FILE *file;
     long rss;
     snprintf(path, sizeof(path), "/proc/%d/statm", pid);
     file = fopen(path, "r");
     if (!file)
     {
-        perror("Error getting file..");
+        perror("Error al obtener el archivo.");
         return -1.0;
     }
 
+    // ------------------
+    
+    char statPath[BUFFER];
+    snprintf(statPath, sizeof(statPath), "/proc/%d/stat", pid);
+    FILE *fileN = fopen(statPath, "r");
+
+    if(fileN==NULL){
+        return -1;
+    }
+
+    char processName[BUFFER];
+    fscanf(fileN, "%*d (%[^)])", processName);
+    fclose(fileN);
+
+    printf("%s\t\t\t\t", processName);
+
+    // ------------------
+
     if (fscanf(file, "%*s %ld", &rss) != 1)
     {
-        perror("Error reading file..");
+        perror("Error al leer el archivo.");
         fclose(file);
         return -1.0;
     }
@@ -35,7 +53,7 @@ float getUsageReal(int pid)
 
 float getUsageVirtual(int pid)
 {
-    char path[MAX_LINE_LENGTH];
+    char path[BUFFER];
     FILE *file;
     long vmsize;
     snprintf(path, sizeof(path), "/proc/%d/statm", pid);
@@ -52,6 +70,24 @@ float getUsageVirtual(int pid)
     }
     fclose(file);
 
+    // ------------------
+    
+    char statPath[BUFFER];
+    snprintf(statPath, sizeof(statPath), "/proc/%d/stat", pid);
+    FILE *fileN = fopen(statPath, "r");
+
+    if(fileN==NULL){
+        return -1;
+    }
+
+    char processName[BUFFER];
+    fscanf(fileN, "%*d (%[^)])", processName);
+    fclose(fileN);
+
+    printf("%s ", processName);
+
+    // ------------------
+
     float memory_usage = vmsize / (float)1024;
     return memory_usage;
 }
@@ -66,14 +102,14 @@ int main(int argc, char *argv[])
 
     if (strcmp(argv[1], "memoria") == 0 && strcmp(argv[2], "-r") == 0)
     {
-        printf("PID\tPercentage of real memory used\n");
+        printf("Nombre\t\t\t\tPID\t\tPorcentaje de memoria real\n");
         FILE *fp = fopen("/proc/meminfo", "r");
         if (fp == NULL)
         {
-            perror("Failed to open /proc/meminfo directory");
+            perror("Falló al abrir el directorio /proc/meminfo.");
             return 1;
         }
-        char line[MAX_LINE_LENGTH];
+        char line[BUFFER];
         long total_memory;
         while (fgets(line, sizeof(line), fp))
         {
@@ -100,7 +136,7 @@ int main(int argc, char *argv[])
                 float memory_usage = getUsageReal(pid);
                 if (memory_usage != -1.0)
                 {
-                    printf("%d\t%.1f%%\n", pid, (memory_usage / total_memory) * 100);
+                    printf("%d\t\t%.1f%%\n", pid, (memory_usage / total_memory));
                 }
             }
         }
@@ -113,7 +149,7 @@ int main(int argc, char *argv[])
             float memory_usage = getUsageVirtual(pid);
             if (memory_usage != -1.0)
             {
-                printf("PID: %d, su porcentaje de uso de memoria virtual es: %.1f%%\n", pid, memory_usage);
+                printf("[PID: %d], su porcentaje de uso de memoria virtual es: %.1f%%\n", pid, memory_usage/72);
             }
             else
             {

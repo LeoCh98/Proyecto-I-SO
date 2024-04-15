@@ -43,6 +43,8 @@ int main(int argc, char *argv[]){
                 argv[2], // PID #1
                 argv[3], // PID #2
                 argv[4], // PID #3
+                argv[5], // PID #3
+                argv[6], // PID #3
                 NULL
             };
 
@@ -51,7 +53,7 @@ int main(int argc, char *argv[]){
         } else {
             close(pipefd_CPU[1]);
 
-            printf("+-----[CPU STATS]-----+\n");
+            printf("+-----[ESTADISTICAS CPU]-----+\n");
             while((n = read(pipefd_CPU[0], buffer, sizeof(buffer))) > 0){
                 printf("%s", buffer);
             }             
@@ -90,14 +92,13 @@ int main(int argc, char *argv[]){
         } else {
             close(pipefd_RAM[1]);
 
-            printf("+-----[RAM STATS]-----+\n");
+            printf("+-----[ESTADISTICAS RAM]-----+\n");
             while((n = read(pipefd_RAM[0], buffer, sizeof(buffer))) > 0){
                 printf("%s", buffer);
             }               
         }
 
-    } else if (strncmp(argv[1], "/mnt", 4) == 0){ // Llamado para datos de la Disco
-
+    } else if (strncmp(argv[1], "/mnt", 4) == 0){ // Llamado para datos de la RAM
         int pipefd_Disk[2];    
         pipe(pipefd_Disk);
 
@@ -125,7 +126,7 @@ int main(int argc, char *argv[]){
         } else {
             close(pipefd_Disk[1]);
 
-            printf("+-----[DISK STATS]-----+\n");
+            printf("+-----[ESTADISTICAS DISCO]-----+\n");
             while((n = read(pipefd_Disk[0], buffer, sizeof(buffer))) > 0){
                 printf("%s", buffer);
             }                         

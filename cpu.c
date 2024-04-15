@@ -42,7 +42,7 @@ int getPercentByProcess(int pid)
     double process_usage_sec = process_utime_sec + process_stime_sec;
     double process_usage = (process_usage_sec * 100) / process_elapsed_sec;
 
-    printf("%s [PID: %d], porcentaje total de uso de la CPU: %.2f%%\n", processName, pid, process_usage);
+    printf("%s [PID: %d], porcentaje total de uso de la CPU en los últimos 5 minutos: %.2f%%\n", processName, pid, process_usage);
 
     return 0;
 }
